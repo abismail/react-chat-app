@@ -1,0 +1,223 @@
+
+.chatInfo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 60px;
+	border-bottom: 1px solid #CCC;
+}
+
+.chatName {
+	text-align: center;
+	line-height: 60px;
+	font-weight: bold;
+}
+
+.editGroup {
+	color: #2196f3;
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 60px;
+	padding: 0 20px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.chatContainer {
+	padding: 20px;
+	position: absolute;
+	top: 60px;
+	left: 0;
+	right: 0;
+	bottom: 60px;
+	overflow: auto;
+}
+
+.message {
+	position: relative;
+	width: 80%;
+	margin-left: auto;
+	margin-bottom: 20px;
+}
+
+.message .initials {
+	width: 40px;
+	height: 40px;
+	background-color: #0091EA;
+	display: inline-block;
+	vertical-align: bottom;
+	border-radius: 50%;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	text-align: center;
+	line-height: 40px;
+	font-weight: bold;
+	color: #FFF;
+}
+
+.message .text {
+	background-color: #0D47A1;
+	color: #FFF;
+	padding: 15px;
+	border-radius: 3px;
+	width: calc(100% - 60px);
+	display: inline-block;
+	vertical-align: bottom;
+	font-size: 15px;
+	position: relative;
+	padding-right: 50px;
+}
+
+.message .text > div:nth-child(2) {
+	font-size: 12px;
+	position: absolute;
+	bottom: 3px;
+	right: 6px;
+}
+
+.message.other {
+	margin-left: 0;
+	margin-right: auto;
+}
+
+.message.other .initials {
+	left: 0;
+	bottom: 0;
+}
+
+.message.other .text {
+	margin-left: 60px;
+	background-color: #e6e6e6;
+	color: #333;r
+}
+
+.newMessage {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 60px;
+	border-top: 1px solid #CCC;
+	font-size: 0;
+}
+
+.newMessage > div {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.newMessage textarea {
+	border: 0;
+	padding: 15px;
+	box-sizing: border-box;
+	outline: none;
+	width: calc(100% - 90px - 90px);
+	resize: none;
+	font-size: 14px;
+}
+
+.newMessage .indicator {
+	width: 90px;
+	height: 64px;
+	border-left: 1px solid #CCC;
+}
+
+.newMessage .indicator > div {
+	border: 2px solid #FFC107;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	margin: 10px auto;
+	position: relative;
+}
+
+.newMessage .indicator .eyes {
+	position: absolute;
+	top: 10px;
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
+.newMessage .indicator .eyes > div {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background-color: #FFC107;
+	display: inline-block;
+}
+
+.newMessage .indicator .eyes > div:first-child {
+	margin-right: 8px;
+}
+
+.newMessage .indicator .mouth {
+	width: 20px;
+	height: 9px;
+	border: 2px solid #FFC107;
+	border-top: 0;
+	position: absolute;
+	left: 50%;
+	margin-left: -10px;
+	transition: 0.4s all ease;
+	height: 0;
+	bottom: 10px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.newMessage .indicator.positive > div {
+	border-color: #4CAF50;
+}
+
+.newMessage .indicator.positive .eyes > div {
+	background-color: #4CAF50;
+}
+
+.newMessage .indicator.positive .mouth {
+	border-color: #4CAF50;
+	height: 9px;
+	border-bottom-left-radius: 20px;
+	border-bottom-right-radius: 20px;
+	bottom: 5px;
+}
+
+.newMessage .indicator.negative > div {
+	border-color: red;
+}
+
+.newMessage .indicator.negative .eyes > div {
+	background-color: red;
+}
+
+.newMessage .indicator.negative .mouth {
+	border-color: red;
+	transform: rotateZ(-180deg);
+	bottom: 7px;
+	border-bottom-left-radius: 20px;
+	border-bottom-right-radius: 20px;
+	height: 9px;
+}
+
+.newMessage .send {
+	width: 90px;
+	text-align: center;
+	line-height: 60px;
+	font-size: 13px;
+	color: #CCC;
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: -0.2px;
+	cursor: pointer;
+	border-left: 1px solid #CCC;
+	cursor: default;
+}
+
+.newMessage .send.active {
+	color: #2196f3;
+	cursor: pointer;
+}
