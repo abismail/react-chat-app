@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="login.css">
+</head>
+<body>
+
+	<table class="middle"><tr><td>
+		
+		<div class="loginContainer">
+
+			<div class="head">Log In</div>
+
+			<input name="email" type="email" placeholder="Email" />
+			<input name="password" type="password" placeholder="Password" />
+
+			<div class="btn">Log In</div>
+
+		</div>
+
+	</td></tr></table>
+
+</body>

@@ -1,5 +1,7 @@
+<!DOCTYPE html>
+<html>
 <head>
-	<link rel="stylesheet" type="text/css" href="css/base.css">
+	<link rel="stylesheet" type="text/css" href="base.css">
 </head>
 <body>
 
@@ -34,7 +36,4 @@
 	</div>
 
 </body>
-
-<template name="groups">
-	
-</template>
+</html>

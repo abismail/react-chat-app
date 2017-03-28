@@ -1,4 +1,3 @@
-
 .chatInfo {
 	position: absolute;
 	top: 0;
@@ -92,7 +91,7 @@
 .message.other .text {
 	margin-left: 60px;
 	background-color: #e6e6e6;
-	color: #333;r
+	color: #333;
 }
 
 .newMessage {
