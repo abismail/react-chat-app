@@ -4,7 +4,6 @@ import { ReactiveVar } from 'meteor/reactive-var';
 //import './main.html';
 import './base.html';
 
-Users = new Mongo.Collection('users');
 // Template.hello.onCreated(function helloOnCreated() {
 //   // counter starts at 0
 //   // this.counter = new ReactiveVar(0);

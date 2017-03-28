@@ -3,6 +3,9 @@ import { HTTP } from 'meteor/http';
 import { xml2js } from 'meteor/peerlibrary:xml2js';
 import { Email } from 'meteor/email';
 
+// Users = new Mongo.Collection('users');
+// var users = Users.find({'email':'ismail29033@gmail.com'}).fetch();
+
 Meteor.startup(() => {
 	// set env vars
 	process.env.MAIL_URL="smtp://testapi%40react.technology.mailgun.org:ccCrkkfDmJVjBWLQ@smtp.mailgun.org:587"; //Authentication error, email server auth failing
@@ -17,8 +20,10 @@ Meteor.startup(() => {
 				console.log("inserting: " + insert_obj.name + ", " + insert_obj.surname + ", " + insert_obj.email);
 				var user_id = null;
 				
+				// Try updating the user with this email address.
 				var update_res = Users.update({email:user.Email}, insert_obj);
 				
+				// If the update doesn't work, we'll do an insert
 				if (update_res == 0) {
 					user_id = Users.insert(insert_obj);
 				}

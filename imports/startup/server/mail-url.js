@@ -1,1 +1,0 @@
-process.env.MAIL_URL="smtp://testapi%40react.technology.mailgun.org:ccCrkkfDmJVjBWLQ@smtp.mailgun.org:587";
