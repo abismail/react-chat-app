@@ -1,13 +1,9 @@
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
+import { jqueryvalidation } from 'meteor/themeteorchef:jquery-validation';
+import { Accounts } from 'meteor/accounts-base';
 
-//import './main.html';
-import './base.html';
-
-// Template.hello.onCreated(function helloOnCreated() {
-//   // counter starts at 0
-//   // this.counter = new ReactiveVar(0);
-// });
+// import './base.html';
 
 // Template.hello.helpers({
 //   counter() {
@@ -22,6 +18,34 @@ import './base.html';
 //   },
 // });
 
-Template.groups.onCreated(function(){
-	
+Template.login.onCreated(function(){
+	console.log("this happened");
 });
+
+Template.login.events({
+	'click div.btn': function(event, template){
+		event.preventDefault();
+
+		var email = template.find('#email').value, pword = template.find('#password').value;
+		console.log("we have email: " + email + ", pword: " + pword);
+		var res = Meteor.loginWithPassword(email, pword);
+		console.log("login:");
+		console.log(res);
+	}
+});
+
+Template.setPassword.events({
+	'mouseup div.btn': function(event, template){
+		event.preventDefault();
+
+		var pword = template.find('#password');
+		console.log('password saved');
+	}
+});
+
+// Template.logout.events({
+// 	'mouseup div.btn': function(event, template){
+// 		event.preventDefault();
+// 		Meteor.logout();
+// 	}
+// });

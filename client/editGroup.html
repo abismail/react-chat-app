@@ -1,0 +1,65 @@
+<template name="editGroup">
+	<div class="settingsContainer">
+
+		<div class="profilePicture">
+			
+			<input type="file">
+			
+			<!-- While uploading, show below spinner -->
+			<div class="spinner" style="display:none;">
+				<div class="sk-circle">
+					<div class="sk-circle1 sk-child"></div>
+					<div class="sk-circle2 sk-child"></div>
+					<div class="sk-circle3 sk-child"></div>
+					<div class="sk-circle4 sk-child"></div>
+					<div class="sk-circle5 sk-child"></div>
+					<div class="sk-circle6 sk-child"></div>
+					<div class="sk-circle7 sk-child"></div>
+					<div class="sk-circle8 sk-child"></div>
+					<div class="sk-circle9 sk-child"></div>
+					<div class="sk-circle10 sk-child"></div>
+					<div class="sk-circle11 sk-child"></div>
+					<div class="sk-circle12 sk-child"></div>
+				</div>
+			</div>
+
+		</div>
+		
+		<!-- Set the "value" attribute of this to the group's name -->
+		<input type="text" name="name" placeholder="Group Name">
+
+		<div class="members">
+			
+			<table>
+				<thead>
+					<tr>
+						<th>Member</th>
+						<th>Admin</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Member Name</td>
+						<td><input type="checkbox" /></td>
+					</tr>
+					<tr>
+						<td>Another Member</td>
+						<td><input type="checkbox" /></td>
+					</tr>
+					<tr>
+						<td>Yet Another Member</td>
+						<td><input type="checkbox" /></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<div class="add">Add Member</div>
+
+		</div>
+
+		<div>
+			<div class="save btn">Save Group</div>
+		</div>
+
+	</div>
+</template>

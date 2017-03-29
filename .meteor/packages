@@ -23,3 +23,6 @@ jquery
 peerlibrary:xml2js
 email
 iron:router
+accounts-password
+themeteorchef:jquery-validation
+autopublish
