@@ -53,13 +53,17 @@
 				</tbody>
 			</table>
 			
-			<div class="add">Add Member</div>
 
+			{{#if isInRole 'admin'}}
+				<div class="add">Add Member</div>
+			{{/if}}
 		</div>
 
-		<div>
-			<div class="save btn">Save Group</div>
-		</div>
+		{{#if isInRole 'admin'}}
+			<div>
+				<div class="save btn">Save Group</div>
+			</div>
+		{{/if}}
 
 	</div>
 </template>

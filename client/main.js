@@ -45,7 +45,7 @@ Template.login.onRendered(function(){
 				email: true
 			}
 		}
-	}); //not working???
+	});
 });
 
 Template.login.events({
@@ -94,7 +94,7 @@ Template.login.events({
 
 // setPassword stuff
 Template.setPassword.onRendered(function(){
-	this.$('.set-password').validate({
+	this.$('.setpassword').validate({
 		rules: {
 			password: {
 				required: true,
@@ -108,8 +108,15 @@ Template.setPassword.events({
 	'mouseup div.btn': function(event, template){
 		event.preventDefault();
 
-		var pword = template.find('#password');
-		console.log('password saved');
+		var pword = template.find('#password').value, token = template.find('#token').value;
+		// console.log("token: " + token + " user: " + UserId);
+		Accounts.resetPassword(token, pword, function(err){
+			if(err==undefined) {
+				sweetAlert("Nice! Now you can start chatting!");
+			}else{
+				sweetAlert("There was a problem trying to set your password: " + err.reason);
+			}
+		});
 	}
 });
 
@@ -117,13 +124,30 @@ Template.setPassword.events({
 Template.base.onRendered(function(){
 	// deselect any selected groups
 	$(".active").removeClass("active");
+	console.log( Roles.getGroupsForUser(this.userId) );
 });
 
 Template.base.events({
 	'click .addGroup': function(){
 		Router.go( '/editGroup');
+	},
+	'click .chat': function(evt){
+		$(evt.target).addClass('active');
+		// $(this).addClass();
 	}
 });
+
+Template.base.helpers({
+	groups: function(){
+		return Roles.getGroupsForUser(this.userId);
+	}
+});
+
+// Template.editGroup.events({
+// 	'':function(){}
+// });
+
+// chat stuff
 
 // Template.logout.events({
 // 	'mouseup div.btn': function(event, template){
