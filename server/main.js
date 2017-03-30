@@ -8,6 +8,9 @@ Meteor.startup(() => {
 	// set env vars
 	process.env.MAIL_URL="smtp://testapi%40react.technology:ccCrkkfDmJVjBWLQ@smtp.mailgun.org:587"; //Authentication error, email server auth failing
 
+	// prepare email template
+	Meteor.call('prepareEmailTemplate');
+
 	var Users = Meteor.users;
 
 	// import users
@@ -36,6 +39,9 @@ Meteor.startup(() => {
 
 
 					if( insert_obj.email == "ismail29033@gmail.com" ) {
+						// make myself an admin
+						Roles.addUsersToRoles(user_id, ['admin']);
+
 						// Already working, so commenting this out to avoid spam temporarily.
 						// Meteor.call('sendEnrollEmail', insert_obj.email, user_id, function(error, result){
 			  	// 			if ( error===undefined ) {
@@ -44,6 +50,12 @@ Meteor.startup(() => {
 			  	// 				console.log("There was an error when trying to email: " + insert_obj.email + " error: " + error);
 			  	// 			}
 			  	// 		});
+
+			  			//not working, we'll just have to put the token in the default email
+			  			// Accounts.sendEnrollmentEmail(user_id);
+					}else{
+						Roles.addUsersToRoles(user_id, ['normal']);
+						Accounts.setPassword(user_id, "password"); // for testing purposes.
 					}
 
 					// to test login
@@ -54,9 +66,6 @@ Meteor.startup(() => {
 				}
 
 			} );
-
-			// console.log("this is what my users look like: " );
-			// console.log(Users.find({}).fetch());
 		} );
 	});
 });
@@ -79,14 +88,18 @@ Meteor.methods({
 			html: "To start chatting, set your password <a href='http://localhost:3000/setPassword/" + user_id + "'>here</a> and login!"
 		});
 	},
-	'setPassword': function(user_id, password) {
-		var users = Meteor.users;
-		var user_obj = users.findOne({_id:user_id});
-		users.update(user_id, user_obj);
-	},
-	// 'loginUser': function(usr_email, usr_pass) {
-	// 	var login_user = Meteor.users.findOne({email: usr_email, password: usr_pass});
-	// 	console.log("found user login: ");
-	// 	console.log(login_user);
-	// }
+	'prepareEmailTemplate': function() {
+		Accounts.emailTemplates.siteName = 'ChatApp';
+		Accounts.emailTemplates.from = 'Blah Admin <testapi@react.technology>';
+
+		Accounts.emailTemplates.enrollAccount.subject = (user) => {
+		  return `Come and have a chat with the ouens, ${user.username}`;
+		};
+
+		Accounts.emailTemplates.enrollAccount.text = (user, url) => {
+		  return 'Come and chat with us!'
+		    + ' To activate your account, simply click the link below:\n\n'
+		    + url;//`http://localhost:3000/setPassword/${user._id}`;
+		};
+	}
 });

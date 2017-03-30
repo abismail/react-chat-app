@@ -1,51 +1,32 @@
-
-<head>
-	<link rel="stylesheet" type="text/css" href="login.css">
-</head>
-<body>
-
-	<table class="middle"><tr><td>
-		{{#if currentUser}}
-			<h1>Logged in!</h1>
-		{{else}}
-			{{#if userid}}
-				{{> setPassword}}
-			{{else}}
-				{{> login}}
-			{{/if}}
-		{{/if}}
-	</td></tr></table>
-
-</body>
-
 <template name="login">
-	<div class="loginContainer">
-		
-		<div class="head">Log In</div>
 
-		<form name="login_form">
-			<input id="email" name="email" type="email" placeholder="Email" />
-			<input id="password" name="password" type="password" placeholder="Password" />
+	<head>
+		<link rel="stylesheet" type="text/css" href="login.css">
+	</head>
+	<body>
 
-			<div class="btn">Log In</div>
-			<input type="submit" value="login" />
-		</form>
+		<table class="middle"><tr><td>
 
-	</div>
+			<div class="loginContainer">
+				{{#if currentUser}}
+					<h1>You are logged in! Please wait to be redirected...</h1>
+				{{else}}
+				
+						<div class="head">Log In</div>
+
+						<form class="login" name="login_form">
+							<input id="email" name="email" type="email" placeholder="Email" />
+							<input id="password" name="password" type="password" placeholder="Password" />
+
+							<div class="btn">Log In</div>
+						</form>
+
+				{{/if}}
+
+			</div>
+		</td></tr></table>
+
+	</body>
+	
 </template>
 
-<template name="setPassword">
-	<div class="loginContainer">
-
-		<div class="head">Set Password</div>
-
-		<div class="subhead">Enter a password below to log in</div>
-
-		<form name="set_password_form">
-			<input id="password" name="password" type="password" placeholder="Password" />
-
-			<div class="btn">Save</div>
-			<input type="submit" value="save" />
-		</form>
-	</div>
-</template>

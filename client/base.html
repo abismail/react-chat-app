@@ -1,4 +1,4 @@
-<template name="groups">
+<template name="base">
 	<head>
 		<link rel="stylesheet" type="text/css" href="css/base.css">
 	</head>
@@ -29,9 +29,10 @@
 		</div>
 
 		<div class="content">
+			{{> yield "secondary"}}
 
 			<!-- The active view (Chats or Edit Group) goes here -->
-
+			{{> yield "active"}}
 		</div>
 
 	</body>
