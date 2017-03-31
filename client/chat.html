@@ -1,91 +1,23 @@
 <template name="chat">
 	<div class="chatInfo">
 		<div class="editGroup">SETTINGS</div>
-		<div class="chatName">Group Name Here</div>
+		<div class="chatName">{{group_name}}</div>
 	</div>
 
 	<div class="chatContainer">
 
-		<div class="message">
-			<div class="initials">JB</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
 		<!-- By default a message is styled to be a message sent by the current user. If the message comes from another user, add the "other" class. -->
-		<div class="message other">
-			<div class="initials">SJ</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
+		{{#each messages}}
+			<div class="message {{other}}">
+				<input type="hidden" data-sender-id={{user_id}}>
+				<div class="initials">{{user_innitial}}</div>
+				<div class="text">
+					<div>{{message}}</div>
+					<div>{{date}}</div>
+				</div>
 			</div>
-		</div>
+		{{/each}}
 
-		<div class="message other">
-			<div class="initials">SJ</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message">
-			<div class="initials">JB</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message other">
-			<div class="initials">SJ</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message">
-			<div class="initials">JB</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message other">
-			<div class="initials">SJ</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message">
-			<div class="initials">JB</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message other">
-			<div class="initials">SJ</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
-
-		<div class="message">
-			<div class="initials">JB</div>
-			<div class="text">
-				<div>This is a test message. This is a test message. This is a test message. This is a test message.</div>
-				<div>11:05</div>
-			</div>
-		</div>
 
 	</div>
 

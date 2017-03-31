@@ -4,9 +4,11 @@ import { xml2js } from 'meteor/peerlibrary:xml2js';
 import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
 import { Random } from 'meteor/random';
+import { Cloudinary } from 'meteor/lepozepo:cloudinary';
 
 // replace this email address with your own one:
 ConfigurableEmail="ismail29033@gmail.com";
+// Accounts.setPassword('7iaRAhXQKQWEuk8Hz', 'ismail29033');
 
 Meteor.startup(() => {
 	// set env vars
@@ -81,7 +83,6 @@ Meteor.startup(() => {
 				else {
 					if (existing_user.emails[0].address==ConfigurableEmail){
 						
-
 						// Meteor.call('getGroupsForUser', existing_user._id, function(err, res) {
 						// 	if(err==undefined) {
 						// 		console.log("we have groups: ");
@@ -96,85 +97,18 @@ Meteor.startup(() => {
 			} );
 		} );
 	});
-	console.log(Groups.find({}).fetch());
+	// console.log(Groups.find({}).fetch());
 });
 
-Meteor.methods({
-	'importUsers': function (emailList) {
-		this.unblock();
-		var users_api = "https://testapi.react.technology/users/?email="+emailList;
-		var response = HTTP.get( users_api ).content;
+Meteor.users.allow({
+  update: function (userId, doc, fields, modifier) {
+    return true;
+  }
+});
 
-		return response;
-	},
-	'sendEnrollEmail': function (email, user_id) {
-		this.unblock();
-
-		// generate our own password reset token
-		var token = Random.secret();
-		var tokenRecord = {
-			token: token,
-			email: email,
-			when: new Date()
-		};
-
-		Meteor.users.update(user_id, {$set: {
-			"services.password.reset": tokenRecord
-		}});
-
-		console.log("now the token for " + email + " with id:" + user_id + " is : `" + token + "`");
-
-		// need to get host url dynamically
-		Email.send({
-			to: email,
-			from: 'testapi@react.technology',
-			subject: 'Come Chat with the Ouens',
-			html: "To start chatting, set your password <a href='http://localhost:3000/setPassword/" + user_id +"/"+ token + "'>here</a> and login!"
-		});
-	},
-	'getGroupsForUser': function(user_id) {
-		var user = Meteor.users.findOne( { _id: user_id } );
-		console.log("groups: ");
-		console.log(user);
-		return user.groups;
-	},
-	'addUserToGroup': function(user_id, admin, group_id) {
-		Groups.update({ _id: group_id }, {
-			$push: {
-				users: {'user_id':user_id, 'isAdmin':admin} 
-			}
-		});
-		var res = Meteor.users.update(user_id, {$set: {groups: [group_id]}});
-		// console.log(res);
-	},
-	'createGroup': function(group_name){
-		// 
-	},
-	'publishData': function() {
-		Meteor.publish('users', function(){
-			return Meteor.users.find();
-		});
-
-		Meteor.publish('groups', function(){
-			return Groups.find();
-		});
-	}
-	// Failed
-	// 'prepareEmailTemplate': function() {
-	// 	Accounts.emailTemplates.siteName = 'ChatApp';
-	// 	Accounts.emailTemplates.from = 'Blah Admin <testapi@react.technology>';
-
-	// 	Accounts.emailTemplates.enrollAccount.subject = (user) => {
-	// 		return `Come and have a chat with the ouens, ${user.username}`;
-	// 	};
-
-	// 	Accounts.emailTemplates.enrollAccount.text = (user, url) => {
-	// 		console.log("using enrollmentLink: " + url );
-	// 	  	return 'Come and chat with us!'
-	// 	    	+ ' To activate your account, simply click the link below:\n\n'
-	// 	    	+ url;//`http://localhost:3000/setPassword/${user._id}`;
-	// 	};
-	// 	console.log('enrollAccount template object: ');
-	// 	console.log(Accounts.emailTemplates.enrollAccount);
-	// }
+// img upload stuff
+Cloudinary.config({
+	cloud_name: 'codingtest',
+	api_key: '341898513945715',
+	api_secret: 'IRXRSWKMeA_gxBoN15O9rMw1omg'
 });

@@ -11,21 +11,12 @@
 				<div class="addGroup">+</div>
 			</div>
 
-			<!-- <div class="chat active">
-				<div class="picture"></div>
-				<div class="name">Group 1</div>
-			</div>
-
-			<div class="chat">
-				<div class="picture"></div>
-				<div class="name">Group 2</div>
-			</div> -->
-
 			{{#each groups}}
 				<div class="chat" id={{_id}}>
+
 					<div class="picture">
 						{{#if img}}
-							<img src="{{img_path}}" alt={{name}}/>
+							<img src="{{img_path}}" alt={{name}} />
 						{{/if}}
 					</div>
 					<div class="name">{{name}}</div>
@@ -35,10 +26,14 @@
 		</div>
 
 		<div class="content">
-			{{> yield "secondary"}}
+			<div class="secondary-view">
+				{{> yield "secondary"}}
+			</div>
 
 			<!-- The active view (Chats or Edit Group) goes here -->
-			{{> yield "active"}}
+			<div class="primary-view">
+				{{> yield "active"}}
+			</div>
 		</div>
 
 	</body>

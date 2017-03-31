@@ -5,11 +5,14 @@ import { Accounts } from 'meteor/accounts-base';
 import { Match } from 'meteor/check';
 
 Groups = new Meteor.Collection("groups");
-// Meteor.subscribe('users');
-// Meteor.subscribe('groups');
 
+// handlebars helper
+Template.registerHelper('equals', function(var1, var2){
+	return var1===var2;
+});
+
+// login stuff
 Template.login.onCreated(function(){
-	// sweetAlert("simple");
 	if(Meteor.user()){
 		// redirect to chat page
 		Router.go('/main');
@@ -83,7 +86,7 @@ Template.setPassword.onRendered(function(){
 });
 
 Template.setPassword.events({
-	'mouseup div.btn': function(event, template){
+	'click div.btn': function(event, template){
 		event.preventDefault();
 
 		var pword = template.find('#password').value, token = template.find('#token').value;
@@ -101,13 +104,11 @@ Template.setPassword.events({
 // base template stuff
 Template.base.onRendered(function(){
 	// deselect any selected groups
-	$(".active").removeClass("active");
-	// console.log( Roles.getGroupsForUser(this.userId) );
+	// $(".active").removeClass("active");
 });
 
 Template.base.events({
 	'click .addGroup': function(){
-		// Router.go( '/editGroup');
 		swal({
 			title: "Add Group",
 			text: "Enter a name for this Group:",
@@ -118,35 +119,30 @@ Template.base.events({
 			inputPlaceholder: "Group Name"
 		},
 		function(grp_name){
-			if (grp_name === false) return false;
+			if (grp_name === false){
+				return false;
+			}
 
 			if (grp_name === "") {
 				swal.showInputError("We can't create a group without a name!");
 				return false;
 			}
 
-			/*Meteor.call('createGroup', grp_name, function(err, res){
-				if(!err){
-					swal("Success!", "The group " + grp_name + " is now open.", "success");
-				}else{
-					console.log("An error occured while trying to create that group: " + err.reason);
-				}
-			});*/
 			var current_user = Meteor.user(), date_obj = new Date();
 
 			var grp_id = Groups.insert({ 
 				name: grp_name,
-				users: [ {user_id: this.userId, isAdmin:'1'} ],
-				messages: [ {user_id: this.userId, message: current_user.username+" created this group.", date: date_obj.toString()} ]
+				users: [ {user_id: current_user._id, isAdmin:'1'} ],
+				messages: [ {user_id: current_user._id, message: current_user.username+" created this group.", date: date_obj.toString()} ]
 			});
-			console.log("group id: " + grp_id);
+			// console.log("group id: " + grp_id);
 
-			console.log('and lookup says: ');
+			// console.log('and lookup says: ');
 			var lookup = Groups.find({_id:grp_id}).fetch();
-			console.log(lookup);
+			// console.log(lookup);
 
 			// leave a lookup reference in the user collection
-			var res = Meteor.users.update(this.userId, {$push: {groups: grp_id}}, function(err, docs){
+			var res = Meteor.users.update(current_user._id, {$push: {groups: grp_id}}, function(err, docs){
 				if(err){
 					console.log("error");
 					console.log(err);
@@ -160,46 +156,255 @@ Template.base.events({
 				swal("Success!", "The group " + grp_name + " is now open.", "success");
 			}
 		});
-
-		// Meteor.call('createGroup', grp_name);
 	},
 	'click .chat': function(evt){
 		if(!evt.target.id){
 			$(evt.target).parent('.chat').addClass('active');
-			Router.go('/editGroup/' + $(evt.target).parent('.chat').attr('id') );
+			Router.go('/chat/' + $(evt.target).parent('.chat').attr('id') );
 		} else {
 			$(evt.target).addClass('active');
-			Router.go('/editGroup/' + $(evt.target).attr('id') );
+			Router.go('/chat/' + $(evt.target).attr('id') );
 		}
 		// $(this).addClass();
-	}
-});
-
-Template.base.helpers({
-	groups: function(){
-		if(Meteor.user()){
-			var current_user = Meteor.user();
-			if (current_user.groups) {
-				return Groups.find({_id: {$in: current_user.groups } });
-			}
-		}
 	}
 });
 
 // editGroup stuff
 Template.editGroup.onCreated(function(){
 	// make user list available so we can add users to a group
-	if(Roles.userIsInRole(this.userId, 'admin')){
-		this.autorun( () => {
-			this.subscribe("allUsers");
+	// if(Roles.userIsInRole(this.userId, 'admin')){
+	// 	this.autorun( () => {
+	// 		this.subscribe("users");
+	// 		this.subscribe("groups");
+	// 	});
+	// }
+
+	// temporary fix
+	$("#name").attr("value", $("#name").data("group-name"));
+});
+
+Template.editGroup.events({
+	// 'keyup #name': function(event) {
+	// 	$("#name")event.target.value;
+	// },
+	'click .save.btn':function(event){
+
+		var grp_id  = $('#name').data('group-id');
+		// console.log(grp_id, $('#name').val());
+
+		Meteor.call('updateGroupName', grp_id, $('#name').val(), function(err, res){
+			if(err==undefined){
+				$(".chatName").html($('#name').val());
+				sweetAlert("Group Name updated Successfully!", "success");
+			}else{
+				console.log("error updating group name:" + err.reason);
+			}
+		});
+	},
+	'click .remove_user': function(event){
+		var user_id = $(event.target).parent('.user_detail').data('user-id'), group_id = $("#name").data("group-id");
+		console.log('removing: ' + user_id + " from group: " + group_id);
+		if(user_id==this.userId){
+			sweetAlert("You can't remove yourself from this group.", "error");
+		}else{
+			swal({
+			        title: "Confirm",
+			        text: "Are you sure you want to remove this user?",
+			        type: "warning",
+			        showCancelButton: true,
+			        confirmButtonColor: "#DD6B55",
+			        confirmButtonText: "Yes",
+			        cancelButtonText: "No",
+			        closeOnConfirm: false,
+			        closeOnCancel: false 
+			    },
+			    function(isConfirm) {
+			        if (isConfirm) {
+			            Meteor.call('removeUserFromGroup', group_id, user_id, function(err){
+							if(err==undefined){
+								$(event.target).parent('.user_detail').remove();
+								sweetAlert("User removed successfully.", "success");
+							}else{
+								console.log('error:' + err.reason);
+							}
+						});
+			        }
+			    }
+			);
+		}
+	},
+	'click .admin_update': function(event) {
+		var admin_val = '0';
+		if(event.target.checked){
+			admin_val = '1';
+		}else{
+			admin_val = '0';
+		}
+
+		var group_id = $("#name").data("group-id");
+
+		Meteor.call('updateGroupAdmin', group_id, this.userId, admin_val, function(err, res){
+			if(err==undefined){
+				// sweetAlert("User removed successfully.", "success");
+			}else{
+				console.log('error:' + err.reason);
+			}
+		});
+
+	},
+	'click .cancel.btn': function(event){
+		$(".primary-view").show('slow');
+		$(".secondary-view").hide('slow');
+	},
+	'click .members .add': function(event) {
+		var group_id = $("#name").data("group-id");
+		//'afoster1@economist.com'
+		swal({
+			title: "Add Member",
+			text: "Enter the email address of the user you want to add:",
+			type: "input",
+			showCancelButton: true,
+			closeOnConfirm: false,
+			animation: "slide-from-top",
+			inputPlaceholder: "Member Email"
+		},
+		function(email){
+			if (email === false){
+				return false;
+			}
+
+			if (email === "") {
+				swal.showInputError("We can't add a member without an email!");
+				return false;
+			}
+
+			Meteor.call('addUserToGroupWithEmail', email, group_id, '0', function(err, res){
+				if (err) {
+					swal("Fail!", "A problem occured when adding the member for " + email + ".", "error");
+				} else {
+					swal("Success!", "Member successfully added.", "success");
+				}
+			});
 		});
 	}
 });
-// Template.editGroup.events({
-// 	'':function(){}
-// });
 
 // chat stuff
+Template.chat.onRendered(function(){
+	$(".secondary-view").hide();
+	
+	// make the current group selected
+	var group_id = $(".secondary-view #name").data('group-id');
+	$(".chats .chat#"+group_id).addClass("active");
+
+	// automatically show latest message in list
+	var latest_message_offset = $(".message").last().offset();
+	$("html, body").animate({
+		scrollTop: latest_message_offset.top-20,
+		scrollLeft: latest_message_offset.left-20,
+	});
+});
+
+Template.chat.events({
+	'click .editGroup': function(event) {
+		$(".primary-view").hide('slow');
+		$(".secondary-view").show('slow');
+	},
+	'keyup .newMessage textarea': function(event){
+		console.log($(event.target).val());
+		var msg = $(event.target).val();
+
+		if( msg ) {
+			$(".send").removeClass("active");
+
+			$.post('http://sentiment.vivekn.com/api/text/', {txt: msg}, function(data){
+				var confidence = parseFloat(data.result.confidence);
+				switch(true) {
+					case (confidence > 80 && data.result.sentiment.toLowerCase()=="negative"):
+						// remove other classes
+						$(".indicator").removeClass("positive");
+
+						// show negative
+						$(".indicator").addClass("negative");
+						break;
+
+					case data.result.sentiment.toLowerCase()=="neutral":
+						$(".indicator").removeClass("positive");
+						$(".indicator").removeClass("negative");
+						break;
+					case  data.result.sentiment.toLowerCase()=="positive":
+						// remove other possible classes
+						$(".indicator").removeClass("negative");
+
+						// show positive
+						$(".indicator").addClass("positive");
+						break;
+				}
+
+				// enable send btn
+				$(".send").addClass("active");
+			});
+		} else {
+			$(".indicator").removeClass("positive");
+			$(".indicator").removeClass("negative");
+
+			if(!msg){
+				$(".send").removeClass("active");
+			}
+		}
+	},
+	'click .send': function(event){
+		if(!$(event.target).hasClass("active")){
+			console.log('that\'s a a damn shame');
+		}else{
+			var group_id = $(".secondary-view #name").data('group-id');
+			var txt = $(".newMessage textarea").val();
+			var user = Meteor.user();
+
+			if($(".indicator").hasClass("negative")) {
+				swal({
+				        title: "Are you sure?",
+				        text: "We have detected that your message is potentially negative.",
+				        type: "warning",
+				        showCancelButton: true,
+				        confirmButtonColor: "#DD6B55",
+				        confirmButtonText: "Send",
+				        cancelButtonText: "Don't Send",
+				        closeOnConfirm: true,
+				        closeOnCancel: false 
+				    },
+				    function(isConfirm) {
+				        if (isConfirm) {
+				            Meteor.call('sendMessage', group_id, txt, user._id, function(err, message){
+								if(err==undefined){
+									// add message to the session var groupMessages
+									// console.log("success");
+									$(".newMessage textarea").val('');
+								}else{
+									console.log('error:' + err.reason);
+								}
+								return false;
+							});
+				        } else {
+				            swal("Cancelled", "Phew!", "error");
+				        }
+				    }
+				);
+			} else {
+				Meteor.call('sendMessage', group_id, txt, user._id, function(err, message){
+					if(err==undefined){
+						// add message to the session var groupMessages
+						// console.log("success");
+						$(".newMessage textarea").val('');
+					}else{
+						console.log('error:' + err.reason);
+					}
+				});
+			}
+		}
+	}
+});
+
 
 // Template.logout.events({
 // 	'mouseup div.btn': function(event, template){
@@ -208,65 +413,10 @@ Template.editGroup.onCreated(function(){
 // 	}
 // });
 
-Meteor.methods({
-	// edit groups
-	getUserGroups: function(){
-		var user_obj = Meteor.users.find({_id: this.userId});
-		console.log("groups: ");
-		console.log(user_obj.groups);
-		return user_obj.groups;
-	},
-	createGroup: function(grp_name){
-		// Was going to implement name uniqueness on a per-user case, but that's not required.
-		// grp_name = this.userId+grp_name;
 
-		// assume admin status for the user creating the group
-		var current_user = Meteor.user(), date_obj = new Date();
-
-		var grp_id = Groups.insert({ 
-			name: grp_name,
-			users: [ {user_id: this.userId, isAdmin:'1'} ],
-			messages: [ {user_id: this.userId, message: current_user.username+" created this group.", date: date_obj.toString()} ]
-		});
-		console.log("group id: " + grp_id);
-
-		console.log('and lookup says: ');
-		var lookup = Groups.find({_id:grp_id}).fetch();
-		console.log(lookup);
-
-		// leave a lookup reference in the user collection
-		var res = Meteor.users.update(this.userId, {$push: {groups: grp_id}});
-		// console.log("user update result: " + res);
-
-		return grp_id;
-	},
-	// addUsersToGroup: function(grp_id, usr_list) {
-	// 	Groups.update({ _id: group_id }, {
-	// 		$push: {
-	// 			users: {'user_id':user_id, 'isAdmin':admin} 
-	// 		}
-	// 	});
-	// 	var res = Meteor.users.update(user_id, {$set: {groups: [group_id]}});
-
-	// 	_.each(usr_list, function(user_obj){
-	// 		Groups.update()
-	// 	});
-	// },
-	saveGroup: function(grp_id, grp_name, usr_list){
-
-	},
-	sendMessage: function(grp_id, msg){
-		var date_obj = new Date();
-		Groups.update({_id:grp_id}, {$push: {messages: {user_id: this.userId, message: msg, date: date_obj.toString()} } });
-	},
-	// userIsGroupAdmin: function(usr_id) {
-	// 	// Actually just an unnecessary check and a headache, we're already checking for admin in the template
-
-	// found how to aggregate mongo list fields here: http://stackoverflow.com/questions/15117030/how-to-filter-array-in-subdocument-with-mongodb
-	// db.test.find({list: {$elemMatch: {a: 1}}}, {'list.$': 1})
-	// 	// var user = Groups.aggregate({}, 
-	// 	// 	{$unwind: '$users'},
-	// 	// 	{$match: {'users.user_id': {$eq: usr_id} } }
-	// 	// );
-	// }
+Meteor.users.allow({
+  update: function (userId, doc, fields, modifier) {
+  	console.log('hit');
+    return true;
+  }
 });

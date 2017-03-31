@@ -1,12 +1,17 @@
 <template name="editGroup">
 	<div class="settingsContainer">
 
+		<div class="cancel btn" style="float:right;">
+			Cancel
+		</div>
 		<div class="profilePicture">
 			
-			<input type="file">
+			{{#if equals isAdmin '1'}}
+				<input type="file">
+			{{/if}}
 			
 			<!-- While uploading, show below spinner -->
-			<!-- <div class="spinner" style="display:none;">
+			<div class="spinner" style="display:none;">
 				<div class="sk-circle">
 					<div class="sk-circle1 sk-child"></div>
 					<div class="sk-circle2 sk-child"></div>
@@ -21,13 +26,12 @@
 					<div class="sk-circle11 sk-child"></div>
 					<div class="sk-circle12 sk-child"></div>
 				</div>
-			</div> -->
+			</div>
 
 		</div>
 		
 		<!-- Set the "value" attribute of this to the group's name -->
-		<input type="text" name="name" placeholder="Group Name" >
-		<!-- put this in onRendered/onCreated {{#if edit_group}} value={{edit_group}} {{/if}} -->
+		<input type="text" id="name" name="name" placeholder="Group Name" data-group-name={{group_name}} data-group-id={{active_group}} value={{group_name}} >
 
 		<div class="members">
 			
@@ -39,28 +43,29 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>Member Name</td>
-						<td><input type="checkbox" /></td>
-					</tr>
-					<tr>
-						<td>Another Member</td>
-						<td><input type="checkbox" /></td>
-					</tr>
-					<tr>
-						<td>Yet Another Member</td>
-						<td><input type="checkbox" /></td>
-					</tr>
+
+					{{#each group_users}}
+						<tr class="user_detail" data-user-id={{user_id}}>
+							<td class="remove_user">{{username}}</td>
+							<td>
+								{{#if equals isAdmin '1'}}
+									<input class="update_admin" type="checkbox" checked="checked" />
+								{{else}}
+									<input class="update_admin" type="checkbox" />
+								{{/if}}
+							</td>
+						</tr>						
+					{{/each}}
 				</tbody>
 			</table>
 			
 
-			{{#if isAdmin}}
+			{{#if equals isAdmin '1'}}
 				<div class="add">Add Member</div>
 			{{/if}}
 		</div>
 
-		{{#if isAdmin}}
+		{{#if equals isAdmin '1'}}
 			<div>
 				<div class="save btn">Save Group</div>
 			</div>
