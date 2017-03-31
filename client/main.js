@@ -4,18 +4,9 @@ import { jqueryvalidation } from 'meteor/themeteorchef:jquery-validation';
 import { Accounts } from 'meteor/accounts-base';
 import { Match } from 'meteor/check';
 
-// Template.hello.helpers({
-//   counter() {
-//     return Template.instance().counter.get();
-//   },
-// });
-
-// Template.hello.events({
-//   'click button'(event, instance) {
-//     // increment the counter when button is clicked
-//     instance.counter.set(instance.counter.get() + 1);
-//   },
-// });
+Groups = new Meteor.Collection("groups");
+Meteor.subscribe('users');
+Meteor.subscribe('groups');
 
 Template.login.onCreated(function(){
 	// sweetAlert("simple");
@@ -24,13 +15,6 @@ Template.login.onCreated(function(){
 		Router.go('/main');
 	}
 });
-
-// this just always runs
-// Meteor.logout(function(err) {
-// 	if(err==undefined) {
-// 		sweetAlert("You are being logged out...");
-// 	}
-// });
 
 // validation
 Template.login.onRendered(function(){
@@ -86,12 +70,6 @@ Template.login.events({
 	}
 });
 
-// Accounts.onLogin(function(err){
-// 	// redirect to chat page
-// 	Router.go('main');
-// 	return this.redirect('/main');
-// });
-
 // setPassword stuff
 Template.setPassword.onRendered(function(){
 	this.$('.setpassword').validate({
@@ -124,25 +102,93 @@ Template.setPassword.events({
 Template.base.onRendered(function(){
 	// deselect any selected groups
 	$(".active").removeClass("active");
-	console.log( Roles.getGroupsForUser(this.userId) );
+	// console.log( Roles.getGroupsForUser(this.userId) );
 });
 
 Template.base.events({
 	'click .addGroup': function(){
-		Router.go( '/editGroup');
+		// Router.go( '/editGroup');
+		swal({
+			title: "Add Group",
+			text: "Enter a name for this Group:",
+			type: "input",
+			showCancelButton: true,
+			closeOnConfirm: false,
+			animation: "slide-from-top",
+			inputPlaceholder: "Group Name"
+		},
+		function(grp_name){
+			if (grp_name === false) return false;
+
+			if (grp_name === "") {
+				swal.showInputError("We can't create a group without a name!");
+				return false;
+			}
+
+			/*Meteor.call('createGroup', grp_name, function(err, res){
+				if(!err){
+					swal("Success!", "The group " + grp_name + " is now open.", "success");
+				}else{
+					console.log("An error occured while trying to create that group: " + err.reason);
+				}
+			});*/
+			var current_user = Meteor.user(), date_obj = new Date();
+
+			var grp_id = Groups.insert({ 
+				name: grp_name,
+				users: [ {user_id: this.userId, isAdmin:'1'} ],
+				messages: [ {user_id: this.userId, message: current_user.username+" created this group.", date: date_obj.toString()} ]
+			});
+			console.log("group id: " + grp_id);
+
+			console.log('and lookup says: ');
+			var lookup = Groups.find({_id:grp_id}).fetch();
+			console.log(lookup);
+
+			// leave a lookup reference in the user collection
+			var res = Meteor.users.update(this.userId, {$push: {groups: grp_id}});
+			console.log("user update result: " + res);
+			if (!lookup || !res) {
+				swal("Fail!", "A problem occured when saving the group " + grp_name + ".", "error");
+			} else {
+				swal("Success!", "The group " + grp_name + " is now open.", "success");
+			}
+		});
+
+		// Meteor.call('createGroup', grp_name);
 	},
 	'click .chat': function(evt){
-		$(evt.target).addClass('active');
+		if(!evt.target.id){
+			$(evt.target).parent('.chat').addClass('active');
+			Router.go('/editGroup/' + $(evt.target).parent('.chat').attr('id') );
+		} else {
+			$(evt.target).addClass('active');
+			Router.go('/editGroup/' + $(evt.target).attr('id') );
+		}
 		// $(this).addClass();
 	}
 });
 
 Template.base.helpers({
 	groups: function(){
-		return Roles.getGroupsForUser(this.userId);
+		if(Meteor.user()){
+			var current_user = Meteor.user();
+			if (current_user.groups) {
+				return Groups.find({_id: {$in: current_user.groups } });
+			}
+		}
 	}
 });
 
+// editGroup stuff
+Template.editGroup.onCreated(function(){
+	// make user list available so we can add users to a group
+	if(Roles.userIsInRole(this.userId, 'admin')){
+		this.autorun( () => {
+			this.subscribe("allUsers");
+		});
+	}
+});
 // Template.editGroup.events({
 // 	'':function(){}
 // });
@@ -155,3 +201,66 @@ Template.base.helpers({
 // 		Meteor.logout();
 // 	}
 // });
+
+Meteor.methods({
+	// edit groups
+	getUserGroups: function(){
+		var user_obj = Meteor.users.find({_id: this.userId});
+		console.log("groups: ");
+		console.log(user_obj.groups);
+		return user_obj.groups;
+	},
+	createGroup: function(grp_name){
+		// Was going to implement name uniqueness on a per-user case, but that's not required.
+		// grp_name = this.userId+grp_name;
+
+		// assume admin status for the user creating the group
+		var current_user = Meteor.user(), date_obj = new Date();
+
+		var grp_id = Groups.insert({ 
+			name: grp_name,
+			users: [ {user_id: this.userId, isAdmin:'1'} ],
+			messages: [ {user_id: this.userId, message: current_user.username+" created this group.", date: date_obj.toString()} ]
+		});
+		console.log("group id: " + grp_id);
+
+		console.log('and lookup says: ');
+		var lookup = Groups.find({_id:grp_id}).fetch();
+		console.log(lookup);
+
+		// leave a lookup reference in the user collection
+		var res = Meteor.users.update(this.userId, {$push: {groups: grp_id}});
+		// console.log("user update result: " + res);
+
+		return grp_id;
+	},
+	// addUsersToGroup: function(grp_id, usr_list) {
+	// 	Groups.update({ _id: group_id }, {
+	// 		$push: {
+	// 			users: {'user_id':user_id, 'isAdmin':admin} 
+	// 		}
+	// 	});
+	// 	var res = Meteor.users.update(user_id, {$set: {groups: [group_id]}});
+
+	// 	_.each(usr_list, function(user_obj){
+	// 		Groups.update()
+	// 	});
+	// },
+	saveGroup: function(grp_id, grp_name, usr_list){
+
+	},
+	sendMessage: function(grp_id, msg){
+		var date_obj = new Date();
+		Groups.update({_id:grp_id}, {$push: {messages: {user_id: this.userId, message: msg, date: date_obj.toString()} } });
+	},
+	// userIsGroupAdmin: function(usr_id) {
+	// 	// Actually just an unnecessary check and a headache, we're already checking for admin in the template
+
+	// found how to aggregate mongo list fields here: http://stackoverflow.com/questions/15117030/how-to-filter-array-in-subdocument-with-mongodb
+	// db.test.find({list: {$elemMatch: {a: 1}}}, {'list.$': 1})
+	// 	// var user = Groups.aggregate({}, 
+	// 	// 	{$unwind: '$users'},
+	// 	// 	{$match: {'users.user_id': {$eq: usr_id} } }
+	// 	// );
+	// }
+});

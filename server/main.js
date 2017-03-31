@@ -5,18 +5,26 @@ import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
 import { Random } from 'meteor/random';
 
+// replace this email address with your own one:
+ConfigurableEmail="ismail29033@gmail.com";
+
 Meteor.startup(() => {
 	// set env vars
 	process.env.MAIL_URL="smtp://testapi%40react.technology:ccCrkkfDmJVjBWLQ@smtp.mailgun.org:587"; //Authentication error, email server auth failing
 
-	// prepare email template
-	// Meteor.call('prepareEmailTemplate');
+	// #REMOVE the following 2lines
+	// var uid = Accounts.findUserByEmail(ConfigurableEmail);
+	// Meteor.users.remove({});//_id:uid
+	
+	DefaultGroupId = Groups.findOne({name:'default'});
+	if(!DefaultGroupId){
+		DefaultGroupId = Groups.insert({name:'default', users: []});
+	}
 
-	// Meteor.users.remove({});
 	var Users = Meteor.users;
 
-		// import users
-	Meteor.call('importUsers', 'ismail29033@gmail.com,john@gmail.com', function(err, res) {
+	// import users
+	Meteor.call('importUsers', ConfigurableEmail+',john@gmail.com', function(err, res) {
 		var users_xml = xml2js.parseString( res, function(xmlerror, xmlresult){
 
 			_.each(xmlresult.Users.User, function (user) {
@@ -25,7 +33,6 @@ Meteor.startup(() => {
 
 
 				var existing_user = Accounts.findUserByEmail(insert_obj.email);
-				// console.log("existing_user for wemail "+insert_obj.email+" is: "+existing_user);
 
 				// no user found with this email, insert a new one or update the user with the same username
 				if (existing_user==null || typeof(existing_user)!=="object" || existing_user==undefined ) {//won't work in the case that users have multiple emails, but we're not working with such users right now.
@@ -42,10 +49,12 @@ Meteor.startup(() => {
 					}
 
 					// belongs in the above if block, but for testing we put this out here
-					if( insert_obj.email == "ismail29033@gmail.com" ) {
+					if( insert_obj.email == ConfigurableEmail ) {
 						// make myself an admin
-						Roles.addUsersToRoles( user_id, 'admin');
-						Roles.addUsersToRoles( user_id, ['admin', 'chatter'], 'Default');
+						Meteor.call('addUserToGroup', user_id, '1', DefaultGroupId);
+
+						// Roles.addUsersToRoles( user_id, 'admin');
+						// Roles.addUsersToRoles( user_id, ['admin', 'chatter'], 'Default');
 
 						// Already working, so commenting this out to avoid spam temporarily.
 						Meteor.call('sendEnrollEmail', insert_obj.email, user_id, function(error, result){
@@ -56,27 +65,38 @@ Meteor.startup(() => {
 			  				}
 			  			});
 					}else{
-						Roles.addUsersToRoles(user_id, 'normal');
-						Roles.addUsersToRoles(user_id, ['chatter'], 'Default');
-						Accounts.setPassword(user_id, "password"); // for testing purposes.
+						// add all other users as non admins to the default group
+						Meteor.call('addUserToGroup', user_id, '0', DefaultGroupId);
+
+						// for testing purposes. #REMOVE
+						Accounts.setPassword(user_id, "password");
 					}
 
-					// to test login
+					// to test login #REMOVE
 					if (insert_obj.email == "john@gmail.com") {
 						Accounts.setPassword(user_id, "sakeenah");
 					}
 				}
+				// for testing purposes.
+				else {
+					if (existing_user.emails[0].address==ConfigurableEmail){
+						
 
-				if(existing_user!==undefined) {
-					if (existing_user.emails[0].address=="ismail29033@gmail.com"){
-						Roles.addUsersToRoles(existing_user._id);
-						console.log(Roles.getGroupsForUser(existing_user._id));
+						// Meteor.call('getGroupsForUser', existing_user._id, function(err, res) {
+						// 	if(err==undefined) {
+						// 		console.log("we have groups: ");
+						// 		console.log(res);
+						// 	} else {
+						// 		console.log("There was a problem ");
+						// 	}
+						// });
 					}
 				}
 
 			} );
 		} );
 	});
+	console.log(Groups.find({}).fetch());
 });
 
 Meteor.methods({
@@ -112,6 +132,34 @@ Meteor.methods({
 			html: "To start chatting, set your password <a href='http://localhost:3000/setPassword/" + user_id +"/"+ token + "'>here</a> and login!"
 		});
 	},
+	'getGroupsForUser': function(user_id) {
+		var user = Meteor.users.findOne( { _id: user_id } );
+		console.log("groups: ");
+		console.log(user);
+		return user.groups;
+	},
+	'addUserToGroup': function(user_id, admin, group_id) {
+		Groups.update({ _id: group_id }, {
+			$push: {
+				users: {'user_id':user_id, 'isAdmin':admin} 
+			}
+		});
+		var res = Meteor.users.update(user_id, {$set: {groups: [group_id]}});
+		// console.log(res);
+	},
+	'createGroup': function(group_name){
+		// 
+	},
+	'publishData': function() {
+		Meteor.publish('users', function(){
+			return Meteor.users.find();
+		});
+
+		Meteor.publish('groups', function(){
+			return Groups.find();
+		});
+	}
+	// Failed
 	// 'prepareEmailTemplate': function() {
 	// 	Accounts.emailTemplates.siteName = 'ChatApp';
 	// 	Accounts.emailTemplates.from = 'Blah Admin <testapi@react.technology>';

@@ -21,12 +21,16 @@
 				<div class="name">Group 2</div>
 			</div> -->
 
-			<!-- {{#each groups}} -->
-				<div class="chat">
-					<div class="picture"></div>
-					<div class="name">Group 3</div>
+			{{#each groups}}
+				<div class="chat" id={{_id}}>
+					<div class="picture">
+						{{#if img}}
+							<img src="{{img_path}}" alt={{name}}/>
+						{{/if}}
+					</div>
+					<div class="name">{{name}}</div>
 				</div>
-			<!-- {{/each}} -->
+			{{/each}}
 
 		</div>
 
