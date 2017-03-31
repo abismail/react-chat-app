@@ -5,8 +5,8 @@ import { Accounts } from 'meteor/accounts-base';
 import { Match } from 'meteor/check';
 
 Groups = new Meteor.Collection("groups");
-Meteor.subscribe('users');
-Meteor.subscribe('groups');
+// Meteor.subscribe('users');
+// Meteor.subscribe('groups');
 
 Template.login.onCreated(function(){
 	// sweetAlert("simple");
@@ -146,9 +146,15 @@ Template.base.events({
 			console.log(lookup);
 
 			// leave a lookup reference in the user collection
-			var res = Meteor.users.update(this.userId, {$push: {groups: grp_id}});
+			var res = Meteor.users.update(this.userId, {$push: {groups: grp_id}}, function(err, docs){
+				if(err){
+					console.log("error");
+					console.log(err);
+				}
+			});
 			console.log("user update result: " + res);
 			if (!lookup || !res) {
+				console.log(res);
 				swal("Fail!", "A problem occured when saving the group " + grp_name + ".", "error");
 			} else {
 				swal("Success!", "The group " + grp_name + " is now open.", "success");

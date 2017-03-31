@@ -26,7 +26,8 @@
 		</div>
 		
 		<!-- Set the "value" attribute of this to the group's name -->
-		<input type="text" name="name" placeholder="Group Name">
+		<input type="text" name="name" placeholder="Group Name" >
+		<!-- put this in onRendered/onCreated {{#if edit_group}} value={{edit_group}} {{/if}} -->
 
 		<div class="members">
 			
@@ -54,12 +55,12 @@
 			</table>
 			
 
-			{{#if isInRole 'admin'}}
+			{{#if isAdmin}}
 				<div class="add">Add Member</div>
 			{{/if}}
 		</div>
 
-		{{#if isInRole 'admin'}}
+		{{#if isAdmin}}
 			<div>
 				<div class="save btn">Save Group</div>
 			</div>
