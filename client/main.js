@@ -209,9 +209,9 @@ Template.editGroup.events({
 	},
 	'click .remove_user': function(event){
 		var user_id = $(event.target).parent('.user_detail').data('user-id'), group_id = $("#name").data("group-id");
-		console.log('removing: ' + user_id + " from group: " + group_id);
-		if(user_id==this.userId){
-			sweetAlert("You can't remove yourself from this group.", "error");
+
+		if(user_id==Meteor.userId()){
+			sweetAlert("Please no!", "This group would be lost without you, you can't leave.", "error");
 		}else{
 			swal({
 			        title: "Confirm",
@@ -251,13 +251,18 @@ Template.editGroup.events({
 
 		var user_id = $(event.target).closest(".user_detail").data("user-id");
 
-		Meteor.call('updateGroupAdmin', group_id, user_id, admin_val, function(err, res){
-			if(err==undefined){
-				sweetAlert("Update successful!", "User updated successfully", "success");
-			}else{
-				console.log('error:' + err.reason);
-			}
-		});
+		if( user_id == Meteor.userId() ) {
+			sweetAlert("Don't Go!", "This group needs your supervision, please don't leave us.", "error");
+			event.target.checked="checked";
+		} else {
+			Meteor.call('updateGroupAdmin', group_id, user_id, admin_val, function(err, res){
+				if(err==undefined){
+					sweetAlert("Update successful!", "User updated successfully", "success");
+				}else{
+					console.log('error:' + err.reason);
+				}
+			});
+		}
 
 	},
 	'click .cancel.btn': function(event){
