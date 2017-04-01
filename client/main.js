@@ -3,6 +3,7 @@ import { ReactiveVar } from 'meteor/reactive-var';
 import { jqueryvalidation } from 'meteor/themeteorchef:jquery-validation';
 import { Accounts } from 'meteor/accounts-base';
 import { Match } from 'meteor/check';
+import { Cloudinary } from 'meteor/lepozepo:cloudinary';
 
 Groups = new Meteor.Collection("groups");
 
@@ -103,8 +104,13 @@ Template.setPassword.events({
 
 // base template stuff
 Template.base.onRendered(function(){
-	// deselect any selected groups
-	// $(".active").removeClass("active");
+	// fix group image
+	$(".chats .chat .picture").each(function(){
+		var img = $(this).data("group-image");
+		if(img){
+			$(this).css("background", "url("+img+") no-repeat");
+		}
+	});
 });
 
 Template.base.events({
@@ -158,6 +164,9 @@ Template.base.events({
 		});
 	},
 	'click .chat': function(evt){
+		// deselect currently selected groups
+		$(".chat").removeClass("active");
+
 		if(!evt.target.id){
 			$(evt.target).parent('.chat').addClass('active');
 			Router.go('/chat/' + $(evt.target).parent('.chat').attr('id') );
@@ -170,17 +179,14 @@ Template.base.events({
 });
 
 // editGroup stuff
-Template.editGroup.onCreated(function(){
-	// make user list available so we can add users to a group
-	// if(Roles.userIsInRole(this.userId, 'admin')){
-	// 	this.autorun( () => {
-	// 		this.subscribe("users");
-	// 		this.subscribe("groups");
-	// 	});
-	// }
-
+Template.editGroup.onRendered(function(){
 	// temporary fix
 	$("#name").attr("value", $("#name").data("group-name"));
+
+	// set group image in editor
+	if($(".profilePicture").data("group-image")) {
+		$(".profilePicture").css("background", "url("+ $(".profilePicture").data("group-image") +") no-repeat");
+	}
 });
 
 Template.editGroup.events({
@@ -233,7 +239,7 @@ Template.editGroup.events({
 			);
 		}
 	},
-	'click .admin_update': function(event) {
+	'click .update_admin': function(event) {
 		var admin_val = '0';
 		if(event.target.checked){
 			admin_val = '1';
@@ -243,9 +249,11 @@ Template.editGroup.events({
 
 		var group_id = $("#name").data("group-id");
 
-		Meteor.call('updateGroupAdmin', group_id, this.userId, admin_val, function(err, res){
+		var user_id = $(event.target).closest(".user_detail").data("user-id");
+
+		Meteor.call('updateGroupAdmin', group_id, user_id, admin_val, function(err, res){
 			if(err==undefined){
-				// sweetAlert("User removed successfully.", "success");
+				sweetAlert("Update successful!", "User updated successfully", "success");
 			}else{
 				console.log('error:' + err.reason);
 			}
@@ -285,6 +293,37 @@ Template.editGroup.events({
 					swal("Success!", "Member successfully added.", "success");
 				}
 			});
+		});
+	},
+	'change .profilePicture input[type="file"]': function(event){
+		event.preventDefault();
+		var group_id = $("#name").data("group-id");
+
+		// show loading spinner
+		$(".profilePicture .spinner").show();
+
+		var pic = $(event.target)[0].files[0];
+		var img = {name: pic.name};
+
+		Cloudinary.upload(pic, function(err, res){
+			if(err==undefined){
+				img.path=res.url;
+				// img.secure_path=res.secure_url; //don't need https paths
+
+				// persist changes to db
+				Meteor.call('addGroupImage', group_id, img, function(err, res){
+					if(!err){
+						$(".profilePicture .spinner").hide();
+						$(".profilePicture").css("background", "url("+img.path+") no-repeat");
+						$(".chats .chat.active .picture").css("background", "url("+img.path+") no-repeat");
+						sweetAlert("Looking good!", "Group Image added successfully!", "success");
+					}else{
+						console.log("group update failed: " + err.reason);
+					}
+				});
+			} else {
+				console.log("Upload error: " + err.reason);
+			}
 		});
 	}
 });

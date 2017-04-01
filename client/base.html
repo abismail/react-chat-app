@@ -13,12 +13,13 @@
 
 			{{#each groups}}
 				<div class="chat" id={{_id}}>
-
-					<div class="picture">
-						{{#if img}}
-							<img src="{{img_path}}" alt={{name}} />
-						{{/if}}
-					</div>
+					<!-- {{if img.path}} -->
+						<div class="picture" data-group-image={{img.path}}>
+						</div>
+					<!-- {{else}} -->
+						<!-- <div class="picture">
+						</div> -->
+					<!-- {{/if}} -->
 					<div class="name">{{name}}</div>
 				</div>
 			{{/each}}

@@ -2,9 +2,11 @@
 	<div class="settingsContainer">
 
 		<div class="cancel btn" style="float:right;">
-			Cancel
+			Back to Group >
 		</div>
-		<div class="profilePicture">
+
+		
+		<div class="profilePicture" data-group-image={{group_image}}>
 			
 			{{#if equals isAdmin '1'}}
 				<input type="file">

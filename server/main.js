@@ -8,7 +8,6 @@ import { Cloudinary } from 'meteor/lepozepo:cloudinary';
 
 // replace this email address with your own one:
 ConfigurableEmail="ismail29033@gmail.com";
-// Accounts.setPassword('7iaRAhXQKQWEuk8Hz', 'ismail29033');
 
 Meteor.startup(() => {
 	// set env vars
@@ -58,7 +57,7 @@ Meteor.startup(() => {
 						// Roles.addUsersToRoles( user_id, 'admin');
 						// Roles.addUsersToRoles( user_id, ['admin', 'chatter'], 'Default');
 
-						// Already working, so commenting this out to avoid spam temporarily.
+						// Send enrollment email (Accounts one didn't work for me, so I duplicated it)
 						Meteor.call('sendEnrollEmail', insert_obj.email, user_id, function(error, result){
 			  				if ( error==undefined ) {
 			  					console.log("Email sent successfuly!");
@@ -73,37 +72,22 @@ Meteor.startup(() => {
 						// for testing purposes. #REMOVE
 						Accounts.setPassword(user_id, "password");
 					}
-
-					// to test login #REMOVE
-					if (insert_obj.email == "john@gmail.com") {
-						Accounts.setPassword(user_id, "sakeenah");
-					}
-				}
-				// for testing purposes.
-				else {
-					if (existing_user.emails[0].address==ConfigurableEmail){
-						
-						// Meteor.call('getGroupsForUser', existing_user._id, function(err, res) {
-						// 	if(err==undefined) {
-						// 		console.log("we have groups: ");
-						// 		console.log(res);
-						// 	} else {
-						// 		console.log("There was a problem ");
-						// 	}
-						// });
-					}
 				}
 
 			} );
 		} );
 	});
-	// console.log(Groups.find({}).fetch());
 });
 
 Meteor.users.allow({
   update: function (userId, doc, fields, modifier) {
     return true;
   }
+});
+Groups.allow({
+	update: function(userId, doc, fields, modifier) {
+	   return true;
+	}
 });
 
 // img upload stuff
