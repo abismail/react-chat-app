@@ -12,10 +12,6 @@ ConfigurableEmail="ismail29033@gmail.com";
 Meteor.startup(() => {
 	// set env vars
 	process.env.MAIL_URL="smtp://testapi%40react.technology:ccCrkkfDmJVjBWLQ@smtp.mailgun.org:587"; //Authentication error, email server auth failing
-
-	// #REMOVE the following 2lines
-	// var uid = Accounts.findUserByEmail(ConfigurableEmail);
-	// Meteor.users.remove({});//_id:uid
 	
 	DefaultGroupId = Groups.findOne({name:'default'});
 	if(!DefaultGroupId){
@@ -25,7 +21,7 @@ Meteor.startup(() => {
 	var Users = Meteor.users;
 
 	// import users
-	Meteor.call('importUsers', ConfigurableEmail+',john@gmail.com', function(err, res) {
+	Meteor.call('importUsers', ConfigurableEmail, function(err, res) {
 		var users_xml = xml2js.parseString( res, function(xmlerror, xmlresult){
 
 			_.each(xmlresult.Users.User, function (user) {
@@ -51,8 +47,6 @@ Meteor.startup(() => {
 
 					// belongs in the above if block, but for testing we put this out here
 					if( insert_obj.email == ConfigurableEmail ) {
-						// make myself an admin
-						Meteor.call('addUserToGroup', user_id, '1', DefaultGroupId);
 
 						// Roles.addUsersToRoles( user_id, 'admin');
 						// Roles.addUsersToRoles( user_id, ['admin', 'chatter'], 'Default');
@@ -66,8 +60,6 @@ Meteor.startup(() => {
 			  				}
 			  			});
 					}else{
-						// add all other users as non admins to the default group
-						Meteor.call('addUserToGroup', user_id, '0', DefaultGroupId);
 
 						// for testing purposes. #REMOVE
 						Accounts.setPassword(user_id, "password");
@@ -86,6 +78,10 @@ Meteor.users.allow({
 });
 Groups.allow({
 	update: function(userId, doc, fields, modifier) {
+	   return true;
+	},
+
+	insert: function(userId, doc, fields, modifier) {
 	   return true;
 	}
 });

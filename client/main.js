@@ -265,7 +265,7 @@ Template.editGroup.events({
 		$(".secondary-view").hide('slow');
 	},
 	'click .members .add': function(event) {
-		var group_id = $("#name").data("group-id");
+		
 		//'afoster1@economist.com'
 		swal({
 			title: "Add Member",
@@ -285,10 +285,11 @@ Template.editGroup.events({
 				swal.showInputError("We can't add a member without an email!");
 				return false;
 			}
+			var group_id = $("#name").data("group-id");
 
 			Meteor.call('addUserToGroupWithEmail', email, group_id, '0', function(err, res){
 				if (err) {
-					swal("Fail!", "A problem occured when adding the member for " + email + ".", "error");
+					swal("Fail!", "Error: " + err.reason + "", "error");
 				} else {
 					swal("Success!", "Member successfully added.", "success");
 				}
