@@ -167,6 +167,16 @@ Template.base.events({
 		// deselect currently selected groups
 		$(".chat").removeClass("active");
 
+		var my_img_path = $(event.target).closest('.picture').data('group-image');
+		var my_group_id = $(evt.target).parent('.chat').attr('id');
+		console.log( "gonna change: " );
+		console.log($(".secondary-view[data-group-id='"+my_group_id+"'] .profilePicture"));
+		console.log("to: " + my_img_path);
+		$(".secondary-view[data-group-id='"+my_group_id+"'] .profilePicture")
+			.css("background", 
+				"url("+ my_img_path +") no-repeat"
+			);
+
 		if(!evt.target.id){
 			$(evt.target).parent('.chat').addClass('active');
 			Router.go('/chat/' + $(evt.target).parent('.chat').attr('id') );
@@ -184,9 +194,14 @@ Template.editGroup.onRendered(function(){
 	$("#name").attr("value", $("#name").data("group-name"));
 
 	// set group image in editor
-	if($(".profilePicture").data("group-image")) {
-		$(".profilePicture").css("background", "url("+ $(".profilePicture").data("group-image") +") no-repeat");
-	}
+
+	// incorrect picture bug fix
+	var selected_group_id = $(".secondary-view #name").data("group-id");//$(".chats .chat.active").attr("id");
+console.log("selected grp: " + selected_group_id);
+
+	// if($(".profilePicture[data-group-id='"+selected_group_id+"']").data("group-image")) {
+	// 	$(".profilePicture[data-group-id='"+selected_group_id+"']").css("background", "url("+ $(".profilePicture[data-group-id='"+selected_group_id+"']").data("group-image") +") no-repeat");
+	// }
 });
 
 Template.editGroup.events({
@@ -208,7 +223,7 @@ Template.editGroup.events({
 		});
 	},
 	'click .remove_user': function(event){
-		var user_id = $(event.target).parent('.user_detail').data('user-id'), group_id = $("#name").data("group-id");
+		var user_id = $(event.target).parent('.user_detail').data('user-id'), group_id = $(".chats .chat.active").attr("id");
 
 		if(user_id==Meteor.userId()){
 			sweetAlert("Please no!", "This group would be lost without you, you can't leave.", "error");
@@ -247,7 +262,7 @@ Template.editGroup.events({
 			admin_val = '0';
 		}
 
-		var group_id = $("#name").data("group-id");
+		var group_id = $(".chats .chat.active").attr("id");
 
 		var user_id = $(event.target).closest(".user_detail").data("user-id");
 
@@ -290,7 +305,7 @@ Template.editGroup.events({
 				swal.showInputError("We can't add a member without an email!");
 				return false;
 			}
-			var group_id = $("#name").data("group-id");
+			var group_id = $(".chats .chat.active").attr("id");
 
 			Meteor.call('addUserToGroupWithEmail', email, group_id, '0', function(err, res){
 				if (err) {
@@ -303,10 +318,10 @@ Template.editGroup.events({
 	},
 	'change .profilePicture input[type="file"]': function(event){
 		event.preventDefault();
-		var group_id = $("#name").data("group-id");
+		var group_id = $(".chats .chat.active").attr("id");
 
 		// show loading spinner
-		$(".profilePicture .spinner").show();
+		$(".profilePicture[data-group-id='"+group_id+"'] .spinner").show();
 
 		var pic = $(event.target)[0].files[0];
 		var img = {name: pic.name};
@@ -319,8 +334,8 @@ Template.editGroup.events({
 				// persist changes to db
 				Meteor.call('addGroupImage', group_id, img, function(err, res){
 					if(!err){
-						$(".profilePicture .spinner").hide();
-						$(".profilePicture").css("background", "url("+img.path+") no-repeat");
+						$(".profilePicture[data-group-id='"+group_id+"'] .spinner").hide();
+						$(".profilePicture[data-group-id='"+group_id+"']").css("background", "url("+img.path+") no-repeat");
 						$(".chats .chat.active .picture").css("background", "url("+img.path+") no-repeat");
 						sweetAlert("Looking good!", "Group Image added successfully!", "success");
 					}else{
@@ -402,7 +417,7 @@ Template.chat.events({
 		if(!$(event.target).hasClass("active")){
 			console.log('that\'s a a damn shame');
 		}else{
-			var group_id = $(".secondary-view #name").data('group-id');
+			var group_id = $(".chats .chat.active").attr('id');
 			var txt = $(".newMessage textarea").val();
 			var user = Meteor.user();
 

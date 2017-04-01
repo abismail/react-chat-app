@@ -27,12 +27,12 @@
 		</div>
 
 		<div class="content">
-			<div class="secondary-view">
+			<div class="secondary-view" data-group-id={{active_group}}>
 				{{> yield "secondary"}}
 			</div>
 
 			<!-- The active view (Chats or Edit Group) goes here -->
-			<div class="primary-view">
+			<div class="primary-view" data-group-id={{active_group}}>
 				{{> yield "active"}}
 			</div>
 		</div>
